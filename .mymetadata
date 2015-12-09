@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-module
+  type="WEB"
+  name="myOrm"
+  id="myeclipse.1449545170681"
+  context-root="/myOrm"
+  j2ee-spec="5.0"
+  archive="myOrm.war">
+  <attributes>
+    <attribute name="webrootdir" value="WebRoot" />
+  </attributes>
+</project-module>
+
