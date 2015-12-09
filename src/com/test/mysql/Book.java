@@ -15,15 +15,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 文件：com.test.mysql.Book.java
- * 日 期：Wed Dec 09 14:32:56 CST 2015
+ * 文件：com.test.Book.java
+ * 日 期：Tue Dec 08 17:09:03 CST 2015
  */
 package com.test.mysql;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
-import org.uorm.orm.annotation.ClassMapping;
-import org.uorm.orm.annotation.FieldMapping;
+
+import com.linkprise.orm.annotation.ClassMapping;
+import com.linkprise.orm.annotation.FieldMapping;
 
 /**
  *
