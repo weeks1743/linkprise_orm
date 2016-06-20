@@ -5,9 +5,11 @@
 import java.sql.ResultSet;
 /*     */ import java.sql.SQLException;
 /*     */ import java.sql.Statement;
+import java.util.ArrayList;
 /*     */ import java.util.Arrays;
 /*     */ import java.util.List;
 /*     */ import java.util.Map;
+
 /*     */ import org.apache.commons.logging.Log;
 /*     */ import org.apache.commons.logging.LogFactory;
 
@@ -733,7 +735,25 @@ public int[] batchUpdate(final String[] sql) throws SQLException {
 /*     */     }
 /* 833 */     return null;
 /*     */   }
-/*     */ 
+
+			// 判断是否为的关键字
+			private String isKeyWord4GenerateInertSql(String column){
+				List<String> mysqlKeyWord = new ArrayList<String>();
+				mysqlKeyWord.add("READ");
+				mysqlKeyWord.add("COMMENT");
+				
+				if(DataBaseType.MYSQL == this.connectionFactory.getConfiguration().getDatabasetype()){
+					if(mysqlKeyWord.contains(column.toUpperCase())){
+						return "`"+column+"`";
+					}else{
+						return column;
+					}
+				}else{
+					return column;
+				}
+				
+			}
+
 /*     */   protected String generateInsertSql(Class<?> cls)
 /*     */   {
 /* 842 */     StringBuffer sql = new StringBuffer("INSERT INTO ");
@@ -757,9 +777,9 @@ public int[] batchUpdate(final String[] sql) throws SQLException {
 /*     */         continue;
 /*     */       }
 /* 862 */       if (count == 0)
-/* 863 */         sql.append(field.columnName());
+/* 863 */         sql.append(isKeyWord4GenerateInertSql(field.columnName()));
 /*     */       else {
-/* 865 */         sql.append(',').append(field.columnName());
+				  sql.append(',').append(isKeyWord4GenerateInertSql(field.columnName()));
 /*     */       }
 /* 867 */       count++;
 /*     */     }
