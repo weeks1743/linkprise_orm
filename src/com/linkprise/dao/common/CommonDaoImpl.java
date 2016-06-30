@@ -9,6 +9,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -39,7 +40,11 @@ public class CommonDaoImpl extends JdbcTemplate implements ICommonDao {
 	private static final Log logger = LogFactory.getLog(CommonDaoImpl.class);
 	public static final int _BATCH_SIZE = 50;
 	private int batchSize = 50;
+	
+	// list的子级
+	private static List list4Val = Arrays.asList(new String[]{"java.util.AbstractList", "java.util.AbstractSequentialList", "java.util.ArrayList", "java.util.AttributeList", "java.util.CopyOnWriteArrayList", "java.util.LinkedList", "java.util.RoleList", "java.util.RoleUnresolvedList", "java.util.Stack", "java.util.Vector" }); 
 
+	
 	public CommonDaoImpl() {
 	}
 
@@ -319,22 +324,67 @@ public class CommonDaoImpl extends JdbcTemplate implements ICommonDao {
 	public int saveBusinessObjs(Object... pojos) throws SQLException {
 		Assert.notEmpty(pojos, "pojos can not be null.");
 		
-		List listInner = (List)pojos[0];
+		boolean isList = false;
 		
-		//logger.debug(pojos);
-		//logger.debug(((List)pojos[0]).get(0));
-		//logger.debug(((List)pojos[0]).get(0).getClass());
+		// 增加List判断，pojos可以直接传递实体对象
+		if(list4Val.contains(pojos.getClass())){
+			isList = true;
+		}
 		
-		// List  = pojos[0] 第一个为整个集合对象
-		// pojos[1,2,3,4] = [Book@f1、Book@f2]
+		if(isList){
+			List listInner = (List)pojos[0];
 		
-		if (listInner.size() == 1) {
-			//String sql = generateInsertSql(pojos[0].getClass());
-			String sql = generateInsertSql(listInner.get(0).getClass());
+			//logger.debug(pojos);
+			//logger.debug(((List)pojos[0]).get(0));
+			//logger.debug(((List)pojos[0]).get(0).getClass());
+			
+			// List  = pojos[0] 第一个为整个集合对象
+			// pojos[1,2,3,4] = [Book@f1、Book@f2]
+			
+			if (listInner.size() == 1) {
+				//String sql = generateInsertSql(pojos[0].getClass());
+				String sql = generateInsertSql(listInner.get(0).getClass());
+				if (autoManagerTransaction)
+					beginTransation();
+				try {
+					int rtn = saveBusinessObjs(listInner.get(0), sql);
+					if (autoManagerTransaction)
+						commitTransation();
+					return rtn;
+				} catch (SQLException e) {
+					if (autoManagerTransaction)
+						rollbackTransation();
+					throw e;
+				} catch (Exception e) {
+					if (autoManagerTransaction)
+						rollbackTransation();
+					throw new SQLException(e);
+				}
+			}
+			int rtnval = 0;
 			if (autoManagerTransaction)
 				beginTransation();
 			try {
-				int rtn = saveBusinessObjs(listInner.get(0), sql);
+				String sql = generateInsertSql(listInner.get(0).getClass());
+				rtnval = batchSaveBusinessObjs(sql, listInner).intValue();
+				if (autoManagerTransaction)
+					commitTransation();
+				return rtnval;
+			} catch (SQLException e) {
+				if (autoManagerTransaction)
+					rollbackTransation();
+				throw e;
+			} catch (Exception e) {
+				if (autoManagerTransaction)
+					rollbackTransation();
+				throw new SQLException(e);
+			}
+		}else{
+			String sql = generateInsertSql(pojos.getClass());
+			if (autoManagerTransaction)
+				beginTransation();
+			try {
+				int rtn = saveBusinessObjs(pojos, sql);
 				if (autoManagerTransaction)
 					commitTransation();
 				return rtn;
@@ -347,24 +397,6 @@ public class CommonDaoImpl extends JdbcTemplate implements ICommonDao {
 					rollbackTransation();
 				throw new SQLException(e);
 			}
-		}
-		int rtnval = 0;
-		if (autoManagerTransaction)
-			beginTransation();
-		try {
-			String sql = generateInsertSql(listInner.get(0).getClass());
-			rtnval = batchSaveBusinessObjs(sql, listInner).intValue();
-			if (autoManagerTransaction)
-				commitTransation();
-			return rtnval;
-		} catch (SQLException e) {
-			if (autoManagerTransaction)
-				rollbackTransation();
-			throw e;
-		} catch (Exception e) {
-			if (autoManagerTransaction)
-				rollbackTransation();
-			throw new SQLException(e);
 		}
 	}
 
