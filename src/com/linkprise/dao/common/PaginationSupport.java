@@ -153,8 +153,7 @@ public class PaginationSupport<T> implements Serializable {
 	 * @return
 	 */
 	public int getNextPage() {
-		return this.startPage >= this.pageCount ? this.pageCount - 1
-				: this.startPage;
+		return this.startPage < this.pageCount ? this.startPage + 1 : this.startPage;
 	}
 
 	/**
@@ -162,7 +161,8 @@ public class PaginationSupport<T> implements Serializable {
 	 * @return
 	 */
 	public int getPreviousPage() {
-		return this.startPage <= 0 ? 0 : this.startPage;
+//		return this.startPage <= 0 ? 0 : this.startPage;
+		return this.startPage == 0 ? 0 :  this.startPage-1;
 	}
 
 	/**
